@@ -10,7 +10,8 @@ import java.util.List;
  *
  * @author Bill Blondeau
  */
-public class EnteredJob implements Job {
+public class PresentedJob implements Job {
+    
     
     private InsideJob insideJob;
     private Object unitOfWork;
@@ -20,7 +21,7 @@ public class EnteredJob implements Job {
     private final Deque backflowQueue = new LinkedList<>();
     private final List<ReturnedJob> contributingReturns = new ArrayList<>();
     
-    public EnteredJob (int jobID, URI resourceDefinitionURI, Object unitOfWork) {
+    public PresentedJob (int jobID, URI resourceDefinitionURI, Object unitOfWork) {
         
         if (resourceDefinitionURI == null) {
             throw new IllegalArgumentException(
@@ -78,10 +79,28 @@ public class EnteredJob implements Job {
     {
         return this.insideJob.getContributingReturns ();
     }
+    
+    public synchronized int getPendingBackflowCount()
+    {
+        return this.backflowQueue.size ();
+    }
+    
+    /**
+     * Convenience method, logically equivalent to 
+     * <code>this.getPendingBackflowCount() == 0</code>.
+     * 
+     * @return 
+     */
+    public synchronized boolean isBackflowEmpty()
+    {
+        return this.backflowQueue.isEmpty ();
+    }
 
     public synchronized void backflow (ReturnedJob returnedJob)
     {
+System.out.println ("In backflow. Enqueueing " + returnedJob + " to " + this.toString ());
         this.backflowQueue.addLast (returnedJob);
+System.out.println ("Done enqueueing. Queue count: " + this.backflowQueue.size ());
     }
 
     public synchronized ReturnedJob getNextBackflowJob ()

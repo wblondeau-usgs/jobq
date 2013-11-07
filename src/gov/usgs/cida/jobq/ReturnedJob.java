@@ -12,11 +12,14 @@ public class ReturnedJob implements Job
 {
 
     private InsideJob insideJob;
-    private List<ReturnedJob> contributingJobs;
+    private final List<ReturnedJob> contributingJobs = new ArrayList<>();
     private Object workResult;
 
-    public ReturnedJob (int jobID, URI resourceDefinitionURI,
-            List<ReturnedJob> contributingJobs, Object workResult)
+    public ReturnedJob (
+            int jobID, 
+            URI resourceDefinitionURI,
+            List<ReturnedJob> contributingJobs, 
+            Object workResult)
     {
 
         if (contributingJobs == null)

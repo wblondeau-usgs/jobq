@@ -5,6 +5,7 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import gov.usgs.cida.miscutils.MiscUtil;
 
 /**
  *
@@ -12,13 +13,18 @@ import java.util.Map;
  */
 public class JobQueue implements JobWorker
 {
+    /**
+     * The singleton instance of this class.
+     */
+    public static final JobQueue JOB_QUEUE = new JobQueue(
+            JobDefaults.SINGLETON_JOBQ_WORKER_URI);
 
-    private final Deque<EnteredJob> insideQueue = new LinkedList<> ();
+    private final Deque<PresentedJob> insideQueue = new LinkedList<> ();
     private URI workerURI;
 
     private final Map<Integer, Job> acceptedJobs = new HashMap<> ();
 
-    public JobQueue (URI workerURI)
+    private JobQueue (URI workerURI)
     {
         if (workerURI == null)
         {
@@ -47,7 +53,7 @@ public class JobQueue implements JobWorker
                     "Parameter 'input' not permitted to be null.");
         }
 
-        EnteredJob newJobToEnqueue = new EnteredJob (
+        PresentedJob newJobToEnqueue = new PresentedJob (
                 JobIDSource.THE_ONLY_JOB_ID_SOURCE.getNewJobID (),
                 designatedResource,
                 unitOfWork
@@ -69,27 +75,27 @@ public class JobQueue implements JobWorker
     }
 
     /**
-     * Retrieves, but does not remove, the EnteredJob at the head of this queue.
+     * Retrieves, but does not remove, the PresentedJob at the head of this queue.
      * If there are no waiting jobs, returns <code>null</code>.
      * @return 
      */
-    public synchronized EnteredJob peekAtNextJob ()
+    public synchronized PresentedJob peekAtNextJob ()
     {
         return this.insideQueue.peekFirst ();
     }
 
     /**
-     * Obtains the EnteredJob at the head of the queue, deletes it
-     * from the queue, and places a reference to it in the Accepted 
-     * Jobs register. It will remain there until removed (hopefully to
+     * Obtains the PresentedJob at the head of the queue, deletes it
+ from the queue, and places a reference to it in the Accepted 
+ Jobs register. It will remain there until removed (hopefully to
      * persistent storage in accordance with archive policy.)
      * 
      * @param jobID
      * @return 
      */
-    public synchronized EnteredJob acceptNextJob (Integer jobID)
+    public synchronized PresentedJob acceptNextJob (Integer jobID)
     {
-        EnteredJob newJob = this.insideQueue.pollFirst ();
+        PresentedJob newJob = this.insideQueue.pollFirst ();
         this.acceptedJobs.put (newJob.getJobID (), newJob);
         newJob.logEvent (this.workerURI, 
                 EventConsequence.ROUTINE, "Accepted.", null);

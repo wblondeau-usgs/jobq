@@ -8,14 +8,14 @@ package gov.usgs.cida.jobq;
  */
 public class JobException extends RuntimeException {
     
-    private final String jobID;
+    private final int jobID;
     
-    public JobException (String jobID, String message, Throwable cause) {
+    public JobException (int jobID, String message, Throwable cause) {
         super(message, cause);
         this.jobID = jobID;
     }
     
-    public String getJobID() {
+    public int getJobID() {
         return this.jobID;
     }
 }
