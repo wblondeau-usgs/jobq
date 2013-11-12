@@ -15,21 +15,19 @@ public class InsideJob implements Job
 {
     private final int jobID;
     private final URI resourceDefinitionURI;
-    
-    private final List<ReturnedJob> contributingReturns = new ArrayList<>();
-    private final Deque<ReturnedJob> returnedWork = new LinkedList<>();
 
     public InsideJob (int jobID, URI resourceDefinitionURI)
     {
         if (resourceDefinitionURI == null)
         {
-            throw new IllegalArgumentException (
-                "Parameter 'resourceDefinitionURI' not permitted to be null.");
+            throw new IllegalArgumentException(
+                    "Parameter 'resourceDefinitionURI' not "
+                            + "permitted to be null.");
         }
         this.jobID = jobID;
         this.resourceDefinitionURI = resourceDefinitionURI;
     }
-    
+
     @Override
     public Integer getJobID ()
     {
@@ -40,11 +38,5 @@ public class InsideJob implements Job
     public URI getResourceDefinitionURI ()
     {
         return this.resourceDefinitionURI;
-    }
-
-    @Override
-    public List<ReturnedJob> getContributingReturns ()
-    {
-        return new ArrayList(this.contributingReturns);
     }
 }

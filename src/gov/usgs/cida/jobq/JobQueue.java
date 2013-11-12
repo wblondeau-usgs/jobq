@@ -5,7 +5,8 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
-import gov.usgs.cida.miscutils.MiscUtil;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -21,8 +22,12 @@ public class JobQueue implements JobWorker
 
     private final Deque<PresentedJob> insideQueue = new LinkedList<> ();
     private URI workerURI;
+    
+    private final List<Runnable> jobRunners = new ArrayList<>();
 
     private final Map<Integer, Job> acceptedJobs = new HashMap<> ();
+    
+    
 
     private JobQueue (URI workerURI)
     {
@@ -50,7 +55,7 @@ public class JobQueue implements JobWorker
         if (unitOfWork == null)
         {
             throw new IllegalArgumentException (
-                    "Parameter 'input' not permitted to be null.");
+                    "Parameter 'unitOfWork' not permitted to be null.");
         }
 
         PresentedJob newJobToEnqueue = new PresentedJob (
@@ -86,8 +91,8 @@ public class JobQueue implements JobWorker
 
     /**
      * Obtains the PresentedJob at the head of the queue, deletes it
- from the queue, and places a reference to it in the Accepted 
- Jobs register. It will remain there until removed (hopefully to
+     * from the queue, and places a reference to it in the Accepted 
+     * Jobs register. It will remain there until removed (hopefully to
      * persistent storage in accordance with archive policy.)
      * 
      * @param jobID

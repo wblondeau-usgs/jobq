@@ -10,16 +10,15 @@ import java.util.List;
  *
  * @author Bill Blondeau
  */
-public class PresentedJob implements Job {
-    
-    
+public class PresentedJob implements Job 
+{
     private InsideJob insideJob;
     private Object unitOfWork;
     private boolean isComplete = false;
     private final List<JobEvent> history = new ArrayList<> ();
-    
     private final Deque backflowQueue = new LinkedList<>();
     private final List<ReturnedJob> contributingReturns = new ArrayList<>();
+
     
     public PresentedJob (int jobID, URI resourceDefinitionURI, Object unitOfWork) {
         
@@ -39,14 +38,52 @@ public class PresentedJob implements Job {
 
     public List<JobEvent> getHistory ()
     {
-        return new ArrayList<> (this.history);
+        return new ArrayList<>(this.history);
     }
 
-    public JobEvent logEvent (URI workerURI, EventConsequence consequence, String description, Throwable cause)
+    /**
+     * Log the event, as described by the parameters, in this 
+     * <code>PresentedJob</code>'s History.
+     * 
+     * @param workerURI The non-null workerURI of the component responsible 
+     *      for the event.
+     * @param consequence The non-null enumerated value describing the category
+     *      of the event and its impact on job control.
+     * @param description A non-null brief human-readable text describing the event.
+     * @param cause any Throwable that caused the event. <code>null</code>
+     *      in the event of a non-Exceptional condition.
+     * @return the JobEvent created and registered with this 
+     *      instance's History.
+     */
+    public JobEvent logEvent (URI workerURI, 
+            EventConsequence consequence, 
+            String description, 
+            Throwable cause)
     {
-        JobEvent retval = new JobEvent (workerURI, this.getJobID(), consequence, description, cause);
+        if (workerURI == null)
+        {
+            throw new IllegalArgumentException (
+                    "Parameter 'workerURI' not permitted to be null.");
+        }
+        if (consequence == null)
+        {
+            throw new IllegalArgumentException (
+                    "Parameter 'consequence' not permitted to be null.");
+        }
+        if (description == null)
+        {
+            throw new IllegalArgumentException (
+                    "Parameter 'description' not permitted to be null.");
+        }
+        
+        JobEvent retval = new JobEvent (
+                workerURI, 
+                this.getJobID(), 
+                consequence, 
+                description, 
+                cause);
 
-        this.history.add (retval);
+        this.history.add(retval);
         if (consequence == EventConsequence.COMPLETE) 
         {
             this.isComplete = true;
@@ -74,10 +111,20 @@ public class PresentedJob implements Job {
         return this.insideJob.getResourceDefinitionURI ();
     }
 
-    @Override
     public List<ReturnedJob> getContributingReturns ()
     {
-        return this.insideJob.getContributingReturns ();
+        return new ArrayList(this.contributingReturns);
+    }
+    
+    public void addContributingReturn (ReturnedJob contributingReturn)
+    {
+        if (contributingReturn == null)
+        {
+            throw new IllegalArgumentException (
+                    "Parameter 'contributingReturn' not "
+                            + "permitted to be null.");
+        }
+        this.contributingReturns.add(contributingReturn);
     }
     
     public synchronized int getPendingBackflowCount()
@@ -98,9 +145,7 @@ public class PresentedJob implements Job {
 
     public synchronized void backflow (ReturnedJob returnedJob)
     {
-System.out.println ("In backflow. Enqueueing " + returnedJob + " to " + this.toString ());
         this.backflowQueue.addLast (returnedJob);
-System.out.println ("Done enqueueing. Queue count: " + this.backflowQueue.size ());
     }
 
     public synchronized ReturnedJob getNextBackflowJob ()
